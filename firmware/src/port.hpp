@@ -10,7 +10,7 @@ namespace gb7
         PortB, PortC, PortD,
     };
     using pin_number = uint8_t;
-    
+
     /*
      * declaration
      */
@@ -34,13 +34,13 @@ namespace gb7
      * definition
      */
     template<port_type P>
-    class port
+    class port_address_converter
     {
     public:
-        port() noexcept {}
-        ~port() = default;
+        port_address_converter() = delete;
+        ~port_address_converter() = delete;
 
-        [[nodiscard]] constexpr volatile uint8_t* get_ddr_address() const noexcept
+        [[nodiscard]] constexpr static volatile uint8_t* get_ddr_address() noexcept
         {
             switch (P)
             {
@@ -52,7 +52,7 @@ namespace gb7
                 return &DDRD;
             }
         }
-        [[nodiscard]] constexpr volatile uint8_t* get_port_address() const noexcept
+        [[nodiscard]] constexpr static volatile uint8_t* get_port_address() noexcept
         {
             switch (P)
             {
@@ -64,7 +64,7 @@ namespace gb7
                 return &PORTD;
             }
         }
-        [[nodiscard]] constexpr volatile uint8_t* get_pin_address() const noexcept
+        [[nodiscard]] constexpr static volatile uint8_t* get_pin_address() noexcept
         {
             switch (P)
             {
@@ -79,20 +79,26 @@ namespace gb7
     };
 
     template<port_type P>
-    class port_readable: port<P>
+    class port_readable
     {
     public:
         port_readable(uint8_t pull_up = 0xff) noexcept
         {
-            *(this->get_ddr_address()) = 0x00;
+            *(port_address_converter<P>::get_ddr_address()) = 0x00;
             if (pull_up != 0x00)
-                *(this->get_port_address()) = pull_up;
+                *(port_address_converter<P>::get_port_address()) = pull_up;
         }
         ~port_readable() = default;
 
         inline uint8_t read() const noexcept
         {
-             return *(this->get_pin_address());
+             return *(port_address_converter<P>::get_pin_address());
+        }
+
+        template<pin_number N>
+        inline auto get_readable_pin() noexcept
+        {
+            return pin_readable<P, N> { *this };
         }
     };
 
@@ -102,19 +108,19 @@ namespace gb7
     public:
         port_writable(uint8_t reversed = 0x00) noexcept
         {
-            *(this->get_ddr_address()) = 0xff;
+            *(port_address_converter<P>::get_ddr_address()) = 0xff;
             if (reversed != 0x00)
-                *(this->get_pin_address()) = reversed;
+                *(port_address_converter<P>::get_pin_address()) = reversed;
         }
         ~port_writable() = default;
 
         inline uint8_t read() const noexcept
         {
-            return *(this->get_port_address());
+            return *(port_address_converter<P>::get_port_address());
         }
         inline void write(uint8_t value) const noexcept
         {
-            *(this->get_port_address()) = value;
+            *(port_address_converter<P>::get_port_address()) = value;
         }
 
         template<pin_number N>
@@ -126,10 +132,10 @@ namespace gb7
 
     enum pin_io_config: uint8_t { readable = 0, writable = 1 };
     template<port_type P, const pin_io_config config[8]>
-    class port_mixed: port<P>
+    class port_mixed
     {
     private:
-        inline static constexpr uint8_t mask = 
+        inline static constexpr uint8_t mask =
             (config[0] == pin_io_config::writable ? 1 : 0) << 0 |
             (config[1] == pin_io_config::writable ? 1 : 0) << 1 |
             (config[2] == pin_io_config::writable ? 1 : 0) << 2 |
@@ -141,22 +147,22 @@ namespace gb7
 
     public:
         port_mixed() noexcept {
-            *(this->get_ddr_address()) = mask;
+            *(port_address_converter<P>::get_ddr_address()) = mask;
         }
         ~port_mixed() = default;
 
         template<pin_number N>
-        auto get_readable_pin() noexcept
+        inline auto get_readable_pin() noexcept
         {
             static_assert(config[N] == pin_io_config::readable, "Tried to read non-readable pin!");
-            return pin_readable<P, N> { *this };
+            return pin_readable<P, N> {};
         }
 
         template<pin_number N>
-        auto get_writable_pin() noexcept
+        inline auto get_writable_pin() noexcept
         {
             static_assert(config[N] == pin_io_config::writable, "Tried to write to non-writable pin!");
-            return pin_writable<P, N> { *this };
+            return pin_writable<P, N> {};
         }
     };
 
@@ -165,15 +171,14 @@ namespace gb7
     {
     private:
         inline static constexpr uint8_t mask = (1 << N);
-        const port<P>& p;
 
     public:
-        pin_readable(port<P>& _p): p(_p) {}
+        pin_readable() = default;
         ~pin_readable() = default;
 
         inline bool read() const noexcept
         {
-            return (*(p.get_pin_address()) & mask) != 0;
+            return (*(port_address_converter<P>::get_pin_address()) & mask) != 0;
         }
 
         inline operator bool() const noexcept
@@ -187,26 +192,25 @@ namespace gb7
     {
     private:
         inline static constexpr uint8_t mask = (1 << N);
-        const port<P>& p;
 
     public:
-        pin_writable(port<P>& _p): p(_p) {}
+        pin_writable() = default;
         ~pin_writable() = default;
 
         inline bool read() const noexcept
         {
-            return (*(p.get_port_address()) & mask) != 0;
+            return (*(port_address_converter<P>::get_port_address()) & mask) != 0;
         }
 
         inline void write(bool value) const noexcept
         {
             if (value)
             {
-                *(p.get_port_address()) |= mask;
+                *(port_address_converter<P>::get_port_address()) |= mask;
             }
             else
             {
-                *(p.get_port_address()) &= ~mask;
+                *(port_address_converter<P>::get_port_address()) &= ~mask;
             }
         }
 
