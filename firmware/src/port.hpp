@@ -15,9 +15,6 @@ namespace gb7
      * declaration
      */
     template<port_type P>
-    class port;
-
-    template<port_type P>
     class port_readable;
 
     template<port_type P>
@@ -98,12 +95,14 @@ namespace gb7
         template<pin_number N>
         inline auto get_readable_pin() noexcept
         {
-            return pin_readable<P, N> { *this };
+            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
+            static_assert(N <= max_n, "Invalid pin number");
+            return pin_readable<P, N> {};
         }
     };
 
     template<port_type P>
-    class port_writable: port<P>
+    class port_writable
     {
     public:
         port_writable(uint8_t reversed = 0x00) noexcept
@@ -126,7 +125,9 @@ namespace gb7
         template<pin_number N>
         inline auto get_writable_pin() noexcept
         {
-            return pin_writable<P, N> { *this };
+            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
+            static_assert(N <= max_n, "Invalid pin number");
+            return pin_writable<P, N> {};
         }
     };
 
@@ -154,6 +155,8 @@ namespace gb7
         template<pin_number N>
         inline auto get_readable_pin() noexcept
         {
+            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
+            static_assert(N <= max_n, "Invalid pin number");
             static_assert(config[N] == pin_io_config::readable, "Tried to read non-readable pin!");
             return pin_readable<P, N> {};
         }
@@ -161,6 +164,8 @@ namespace gb7
         template<pin_number N>
         inline auto get_writable_pin() noexcept
         {
+            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
+            static_assert(N <= max_n, "Invalid pin number");
             static_assert(config[N] == pin_io_config::writable, "Tried to write to non-writable pin!");
             return pin_writable<P, N> {};
         }
