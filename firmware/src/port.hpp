@@ -11,20 +11,35 @@ namespace gb7
     };
     using pin_number = uint8_t;
 
+
     /*
-     * declaration
+     * concepts
      */
-    template<port_type P>
-    class port_readable;
+    template<typename T>
+    concept PinReadable = requires(T& p)
+    {
+        { p.read() } -> bool;
+    };
+    
+    template<typename T, bool B>
+    concept PinWritable = requires(T& p)
+    {
+        p.write(B);
+    };
 
-    template<port_type P>
-    class port_writable;
-
-    template<port_type P, pin_number N>
-    class pin_readable;
-
-    template<port_type P, pin_number N>
-    class pin_writable;
+    template<typename T>
+    concept PortReadable = requires(T& p)
+    {
+        { p.read() } -> uint8_t;
+        p.get_readable_pin();
+    };
+    
+    template<typename T, uint8_t N>
+    concept PortWritable = requires(T& p)
+    {
+        p.write(N);
+        p.get_writable_pin();
+    };
 
 
     /*
@@ -75,31 +90,66 @@ namespace gb7
         }
     };
 
-    template<port_type P>
-    class port_readable
+
+    template<port_type P, pin_number N>
+    class pin_writable
     {
+    private:
+        inline static constexpr uint8_t mask = (1 << N);
+
     public:
-        port_readable(uint8_t pull_up = 0xff) noexcept
-        {
-            *(port_address_converter<P>::get_ddr_address()) = 0x00;
-            if (pull_up != 0x00)
-                *(port_address_converter<P>::get_port_address()) = pull_up;
-        }
-        ~port_readable() = default;
+        pin_writable() = default;
+        ~pin_writable() = default;
 
-        inline uint8_t read() const noexcept
+        inline bool read() const noexcept
         {
-             return *(port_address_converter<P>::get_pin_address());
+            return (*(port_address_converter<P>::get_port_address()) & mask) != 0;
         }
 
-        template<pin_number N>
-        inline auto get_readable_pin() noexcept
+        inline void write(bool value) const noexcept
         {
-            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
-            static_assert(N <= max_n, "Invalid pin number");
-            return pin_readable<P, N> {};
+            if (value)
+            {
+                *(port_address_converter<P>::get_port_address()) |= mask;
+            }
+            else
+            {
+                *(port_address_converter<P>::get_port_address()) &= ~mask;
+            }
+        }
+
+        inline operator bool() const noexcept
+        {
+            return read();
+        }
+        inline bool operator=(bool value) const noexcept
+        {
+            write(value);
+            return value;
         }
     };
+
+    template<port_type P, pin_number N>
+    class pin_readable
+    {
+    private:
+        inline static constexpr uint8_t mask = (1 << N);
+
+    public:
+        pin_readable() = default;
+        ~pin_readable() = default;
+
+        inline bool read() const noexcept
+        {
+            return (*(port_address_converter<P>::get_pin_address()) & mask) != 0;
+        }
+
+        inline operator bool() const noexcept
+        {
+            return read();
+        }
+    };
+
 
     template<port_type P>
     class port_writable
@@ -128,6 +178,32 @@ namespace gb7
             constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
             static_assert(N <= max_n, "Invalid pin number");
             return pin_writable<P, N> {};
+        }
+    };
+
+    template<port_type P>
+    class port_readable
+    {
+    public:
+        port_readable(uint8_t pull_up = 0xff) noexcept
+        {
+            *(port_address_converter<P>::get_ddr_address()) = 0x00;
+            if (pull_up != 0x00)
+                *(port_address_converter<P>::get_port_address()) = pull_up;
+        }
+        ~port_readable() = default;
+
+        inline uint8_t read() const noexcept
+        {
+             return *(port_address_converter<P>::get_pin_address());
+        }
+
+        template<pin_number N>
+        inline auto get_readable_pin() noexcept
+        {
+            constexpr pin_number max_n = (P == port_type::PortC ? 6 : 7);
+            static_assert(N <= max_n, "Invalid pin number");
+            return pin_readable<P, N> {};
         }
     };
 
@@ -168,65 +244,6 @@ namespace gb7
             static_assert(N <= max_n, "Invalid pin number");
             static_assert(config[N] == pin_io_config::writable, "Tried to write to non-writable pin!");
             return pin_writable<P, N> {};
-        }
-    };
-
-    template<port_type P, pin_number N>
-    class pin_readable
-    {
-    private:
-        inline static constexpr uint8_t mask = (1 << N);
-
-    public:
-        pin_readable() = default;
-        ~pin_readable() = default;
-
-        inline bool read() const noexcept
-        {
-            return (*(port_address_converter<P>::get_pin_address()) & mask) != 0;
-        }
-
-        inline operator bool() const noexcept
-        {
-            return read();
-        }
-    };
-
-    template<port_type P, pin_number N>
-    class pin_writable
-    {
-    private:
-        inline static constexpr uint8_t mask = (1 << N);
-
-    public:
-        pin_writable() = default;
-        ~pin_writable() = default;
-
-        inline bool read() const noexcept
-        {
-            return (*(port_address_converter<P>::get_port_address()) & mask) != 0;
-        }
-
-        inline void write(bool value) const noexcept
-        {
-            if (value)
-            {
-                *(port_address_converter<P>::get_port_address()) |= mask;
-            }
-            else
-            {
-                *(port_address_converter<P>::get_port_address()) &= ~mask;
-            }
-        }
-
-        inline operator bool() const noexcept
-        {
-            return read();
-        }
-        inline bool operator=(bool value) const noexcept
-        {
-            write(value);
-            return value;
         }
     };
 } // namespace gb7
