@@ -246,6 +246,67 @@ namespace gb7
             return pin_writable<P, N> {};
         }
     };
+
+    template<port_type P>
+    class port_dyamic
+    {
+    public:
+        port_dyamic() noexcept
+        {
+            *(port_address_converter<P>::get_ddr_address()) = 0xff;
+        }
+        ~port_dyamic() = default;
+
+        inline void set_direction(pin_io_config config[8]) noexcept
+        {
+            const uint8_t mask =
+                (config[0] == pin_io_config::writable ? 1 : 0) << 0 |
+                (config[1] == pin_io_config::writable ? 1 : 0) << 1 |
+                (config[2] == pin_io_config::writable ? 1 : 0) << 2 |
+                (config[3] == pin_io_config::writable ? 1 : 0) << 3 |
+                (config[4] == pin_io_config::writable ? 1 : 0) << 4 |
+                (config[5] == pin_io_config::writable ? 1 : 0) << 5 |
+                (config[6] == pin_io_config::writable ? 1 : 0) << 6 |
+                (config[7] == pin_io_config::writable ? 1 : 0) << 7;
+            
+            *(port_address_converter<P>::get_ddr_address()) = mask;
+        }
+        inline void set_direction(uint8_t mask) noexcept
+        {
+            *(port_address_converter<P>::get_ddr_address()) = mask;
+        }
+
+        inline uint8_t read() const noexcept
+        {
+            return *(port_address_converter<P>::get_port_address());
+        }
+        inline void write(uint8_t value) const noexcept
+        {
+            *(port_address_converter<P>::get_port_address()) = value;
+        }
+
+        inline operator uint8_t() const noexcept
+        {
+            return read();
+        }
+        inline uint8_t operator=(uint8_t v) const noexcept
+        {
+            write(v);
+            return v;
+        }
+
+        template<pin_number N>
+        inline auto get_readable_pin() noexcept
+        {
+            return pin_readable<P, N> {};
+        }
+
+        template<pin_number N>
+        inline auto get_writable_pin() noexcept
+        {
+            return pin_writable<P, N> {};
+        }
+    };
 } // namespace gb7
 
 #endif // PORT_H
