@@ -9,7 +9,7 @@ namespace gb7
     {
         PortB, PortC, PortD,
     };
-    using pin_number = uint8_t;
+    using pin_number = uint16_t;
 
 
     /*
@@ -21,24 +21,24 @@ namespace gb7
         { p.read() } -> bool;
     };
     
-    template<typename T, bool B>
+    template<typename T>
     concept PinWritable = requires(T& p)
     {
-        p.write(B);
+        p.write;
     };
 
     template<typename T>
     concept PortReadable = requires(T& p)
     {
         { p.read() } -> uint8_t;
-        p.get_readable_pin();
+        p.get_readable_pin;
     };
     
-    template<typename T, uint8_t N>
+    template<typename T>
     concept PortWritable = requires(T& p)
     {
-        p.write(N);
-        p.get_writable_pin();
+        p.write;
+        p.get_writable_pin;
     };
 
 
