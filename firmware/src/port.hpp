@@ -228,6 +228,25 @@ namespace gb7
         }
         ~port_mixed() = default;
 
+        inline uint8_t read() const noexcept
+        {
+            return *(port_address_converter<P>::get_port_address());
+        }
+        inline void write(uint8_t value) const noexcept
+        {
+            *(port_address_converter<P>::get_port_address()) = value;
+        }
+
+        inline operator uint8_t() const noexcept
+        {
+            return read();
+        }
+        inline uint8_t operator=(uint8_t v) const noexcept
+        {
+            write(v);
+            return v;
+        }
+
         template<pin_number N>
         inline auto get_readable_pin() noexcept
         {
