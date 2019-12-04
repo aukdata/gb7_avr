@@ -3,157 +3,217 @@
 
 #include <avr/io.h>
 
-namespace gb7
+#ifndef F_CPU
+#define F_CPU 8000000
+#endif // F_CPU
+
+
+namespace gb7::timer
 {
     using time_unit = uint32_t;
 
-    namespace timer
+    namespace raw_timers
     {
-        namespace raw_timers
+        enum class pwm_mode
         {
-            enum class pwm_mode
-            {
-                none            = 0b00,
-                toggle_on_match = 0b01,
-                low_on_match    = 0b10,
-                high_on_match   = 0b11,
-            };
-            enum class timer_mode
-            {
-                normal            = 0b00,
-                ctc               = 0b10,
-                fast_pwm          = 0b11,
-                phase_correct_pwm = 0b01,
-            };
-            enum class clock_division
-            {
-                no_clock              = 0b000,
-                no_division           = 0b001,
-                division_8            = 0b010,
-                division_64           = 0b011,
-                division_256          = 0b100,
-                division_1024         = 0b101,
-                external_falling_edge = 0b110,
-                external_rising_edge  = 0b111,
-            };
-
-            class timer_address_converter
-            {
-
-            };
-
-            class timer0
-            {
-            public:
-                timer0() = delete;
-                ~timer0() = delete;
-
-                static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, clock_division division) noexcept
-                {
-                    TCCR0A =
-                        (static_cast<uint8_t>(oc0a) << 6) |
-                        (static_cast<uint8_t>(oc0b) << 4) |
-                        (static_cast<uint8_t>(mode));
-                    TCCR0B = static_cast<uint8_t>(division);
-                }
-
-                static void enable_timer_interrupt(bool compare_a, bool compare_b, bool overflow) noexcept
-                {
-                    if (compare_a || compare_b || overflow)
-                    {
-                        TIMSK0 =
-                            (compare_a ? 0b010 : 0) |
-                            (compare_b ? 0b110 : 0) |
-                            (overflow  ? 0b001 : 0);
-                    }
-                }
-            };
-
-            class timer2
-            {
-            public:
-                timer2() = delete;
-                ~timer2() = delete;
-
-                inline static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, clock_division division) noexcept
-                {
-                    TCCR2A =
-                        (static_cast<uint8_t>(oc0a) << 6) |
-                        (static_cast<uint8_t>(oc0b) << 4) |
-                        (static_cast<uint8_t>(mode));
-                    TCCR2B = static_cast<uint8_t>(division);
-                }
-
-                inline static void enable_timer_interrupt(bool compare_a, bool compare_b, bool overflow) noexcept
-                {
-                    if (compare_a || compare_b || overflow)
-                    {
-                        TIMSK2 =
-                            (compare_a ? 0b010 : 0) |
-                            (compare_b ? 0b110 : 0) |
-                            (overflow  ? 0b001 : 0);
-                    }
-                }
-            };
-        } // namespace raw_timers
-
-        namespace literals
+            none            = 0b00,
+            toggle_on_match = 0b01,
+            low_on_match    = 0b10,
+            high_on_match   = 0b11,
+        };
+        enum class timer_mode
         {
-            constexpr time_unit operator""_us(unsigned long long v) noexcept
-            {
-                return static_cast<time_unit>(v);
-            }
-            constexpr time_unit operator""_ms(unsigned long long v) noexcept
-            {
-                return static_cast<time_unit>(v * 1e3);
-            }
-            constexpr time_unit operator""_s(unsigned long long v) noexcept
-            {
-                return static_cast<time_unit>(v * 1e6);
-            }
-        } // namespace literals
+            normal            = 0b00,
+            ctc               = 0b10,
+            fast_pwm          = 0b11,
+            phase_correct_pwm = 0b01,
+        };
+        enum class clock_division
+        {
+            no_clock              = 0b000,
+            no_division           = 0b001,
+            division_8            = 0b010,
+            division_64           = 0b011,
+            division_256          = 0b100,
+            division_1024         = 0b101,
+            external_falling_edge = 0b110,
+            external_rising_edge  = 0b111,
+        };
 
-
-        // consume timer 2
-        class multi_timer
+        class timer0
         {
         public:
-            using callback_func = void(*)(void*);
+            timer0() = delete;
+            ~timer0() = delete;
 
-        private:
-            struct stack_item
+            static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, clock_division division) noexcept
             {
-            private:
-                inline static bool initialized = false;
-
-            public:
-                multi_timer() noexcept
-                {
-                    raw_timers::timer2::init(
-                        raw_timers::pwm_mode::none,
-                        raw_timers::pwm_mode::none,
-                        raw_timers::timer_mode::normal,
-                        raw_timers::clock_division::division_8
-                    );
-                    raw_timers::timer2::enable_timer_interrupt(false, false, true);
-                }
-                ~multi_timer()
-                {
-
-                }
-            };
-
-            template<time_unit us, class function>
-            void evoke_in(function callback)
-            {
+                TCCR0A =
+                    (static_cast<uint8_t>(oc0a) << 6) |
+                    (static_cast<uint8_t>(oc0b) << 4) |
+                    (static_cast<uint8_t>(mode));
+                TCCR0B = static_cast<uint8_t>(division);
             }
 
-            template<time_unit us, class function>
-            void evoke_every(function callback)
+            static void enable_timer_interrupt(bool compare_a, bool compare_b, bool overflow) noexcept
             {
+                if (compare_a || compare_b || overflow)
+                {
+                    TIMSK0 =
+                        (compare_a ? 0b010 : 0) |
+                        (compare_b ? 0b110 : 0) |
+                        (overflow  ? 0b001 : 0);
+                }
             }
         };
-    }
-} // namespace gb7
+
+        class timer2
+        {
+        public:
+            timer2() = delete;
+            ~timer2() = delete;
+
+            inline static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, clock_division division) noexcept
+            {
+                TCCR2A =
+                    (static_cast<uint8_t>(oc0a) << 6) |
+                    (static_cast<uint8_t>(oc0b) << 4) |
+                    (static_cast<uint8_t>(mode));
+                TCCR2B = static_cast<uint8_t>(division);
+            }
+
+            inline static void enable_compare_match_a_interrupt(uint8_t count) noexcept
+            {
+                TIMSK2 |= 0b010;
+                OCR2A = count;
+            }
+            inline static void enable_compare_match_b_interrupt(uint8_t count) noexcept
+            {
+                TIMSK2 |= 0b100;
+                OCR2B = count;
+            }
+            inline static void enable_overflow_interrupt() noexcept
+            {
+                TIMSK2 |= 0b001;
+            }
+        };
+    } // namespace raw_timers
+
+    namespace literals
+    {
+        constexpr time_unit operator""_us(unsigned long long v) noexcept
+        {
+            return static_cast<time_unit>(v);
+        }
+        constexpr time_unit operator""_ms(unsigned long long v) noexcept
+        {
+            return static_cast<time_unit>(v * 1e3);
+        }
+        constexpr time_unit operator""_s(unsigned long long v) noexcept
+        {
+            return static_cast<time_unit>(v * 1e6);
+        }
+    } // namespace literals
+
+
+    class multi_timer
+    {
+    public:
+        using callback_func = void(*)(void*);
+
+    private:
+        struct stack_item
+        {
+            callback_func func;
+            void* data;
+            time_unit next_time;
+            time_unit period;
+        };
+
+        constexpr inline static int MAX_CALLBACK_FUNC_NUM = 8;
+        inline static stack_item items[MAX_CALLBACK_FUNC_NUM];
+        inline static time_unit now;
+
+    public:
+        multi_timer() = delete;
+        ~multi_timer() = delete;
+
+        static void init() noexcept
+        {
+            raw_timers::timer2::init(
+                raw_timers::pwm_mode::none, raw_timers::pwm_mode::none,
+                raw_timers::timer_mode::normal, raw_timers::clock_division::division_8
+            );
+            for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
+            {
+                items[i].func = nullptr;
+            }
+
+            raw_timers::timer2::enable_overflow_interrupt();
+            constexpr int of = 100e-6 * F_CPU;
+        }
+
+
+        template<time_unit time>
+        static int evoke_in(callback_func callback, void* data) noexcept
+        {
+            for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
+            {
+                if (items[i].func != nullptr)
+                {
+                    items[i].func = callback;
+                    items[i].data = data;
+                    items[i].next_time = now + time;
+                    items[i].period = 0;
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        template<time_unit time>
+        static int evoke_every(callback_func callback, void* data) noexcept
+        {
+            for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
+            {
+                if (items[i].func != nullptr)
+                {
+                    items[i].func = callback;
+                    items[i].data = data;
+                    items[i].next_time = now + time;
+                    items[i].period = time;
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        static void remove_callback(int id) noexcept
+        {
+            if (0 <= id && id < MAX_CALLBACK_FUNC_NUM)
+                items[id].func = nullptr;
+        }
+
+        static void on_timer_interrupt() noexcept
+        {
+            now++;
+            for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
+            {
+                if (items[i].func != nullptr && items[i].next_time == now)
+                {
+                    items[i].func(items[i].data);
+                    if (items[i].period > 0)
+                    {
+                        items[i].next_time += items[i].period;
+                    }
+                    else
+                    {
+                        items[i].func = nullptr;
+                    }
+                }
+            }
+        }
+    };
+} // namespace gb7::timer
 
 #endif // TIMER_HPP
