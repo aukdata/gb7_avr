@@ -2,5 +2,7 @@
 *.elf
 *.hex
 *.s
-.DS_Store
+*.pyc
+*.xcodeproj
+.*
 build
