@@ -98,9 +98,6 @@ namespace gb7
         inline static constexpr uint8_t mask = (1 << N);
 
     public:
-        pin_writable() = default;
-        ~pin_writable() = default;
-
         inline bool read() const noexcept
         {
             return (*(port_address_converter<P>::get_port_address()) & mask) != 0;
@@ -136,9 +133,6 @@ namespace gb7
         inline static constexpr uint8_t mask = (1 << N);
 
     public:
-        pin_readable() = default;
-        ~pin_readable() = default;
-
         inline bool read() const noexcept
         {
             return (*(port_address_converter<P>::get_pin_address()) & mask) != 0;
@@ -161,7 +155,6 @@ namespace gb7
             if (reversed != 0x00)
                 *(port_address_converter<P>::get_pin_address()) = reversed;
         }
-        ~port_writable() = default;
 
         inline uint8_t read() const noexcept
         {
@@ -201,7 +194,6 @@ namespace gb7
             if (pull_up != 0x00)
                 *(port_address_converter<P>::get_port_address()) = pull_up;
         }
-        ~port_readable() = default;
 
         inline uint8_t read() const noexcept
         {
@@ -241,7 +233,6 @@ namespace gb7
         port_mixed() noexcept {
             *(port_address_converter<P>::get_ddr_address()) = mask;
         }
-        ~port_mixed() = default;
 
         inline uint8_t read() const noexcept
         {
@@ -289,7 +280,6 @@ namespace gb7
         {
             *(port_address_converter<P>::get_ddr_address()) = 0xff;
         }
-        ~port_dyamic() = default;
 
         inline void set_direction(pin_io_config config[8]) noexcept
         {
