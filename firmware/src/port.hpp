@@ -12,6 +12,7 @@ namespace gb7
     using pin_number = uint16_t;
 
 
+#if defined __cpp_concepts && __cpp_concepts >= 201907
     /*
      * concepts
      */
@@ -40,6 +41,7 @@ namespace gb7
         p.write;
         p.get_writable_pin;
     };
+#endif
 
 
     /*
