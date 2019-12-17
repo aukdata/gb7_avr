@@ -273,13 +273,19 @@ namespace gb7::timer
     };
 } // namespace gb7::timer
 
+
+#ifdef GB7_TIMER_USE_EVOKE
+
 ISR(TIMER0_OVF_vect)
 {
     gb7::timer::timer0::on_timer_interrupt();
 }
+
 ISR(TIMER2_OVF_vect)
 {
     gb7::timer::timer2::on_timer_interrupt();
 }
+
+#endif // GB7_TIMER_USE_EVOKE
 
 #endif // TIMER_HPP
