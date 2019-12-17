@@ -55,6 +55,11 @@ namespace gb7::timer
                 TCCR0B = static_cast<uint8_t>(division);
             }
 
+            inline static void set_ctc_top(uint8_t ocr0a) noexcept
+            {
+                OCR0A = ocr0a;
+            }
+
             static void enable_timer_interrupt(bool compare_a, bool compare_b, bool overflow) noexcept
             {
                 if (compare_a || compare_b || overflow)
@@ -80,6 +85,11 @@ namespace gb7::timer
                     (static_cast<uint8_t>(oc0b) << 4) |
                     (static_cast<uint8_t>(mode));
                 TCCR2B = static_cast<uint8_t>(division);
+            }
+
+            inline static void set_ctc_top(uint8_t ocr2a) noexcept
+            {
+                OCR2A = ocr2a;
             }
 
             inline static void enable_compare_match_a_interrupt(uint8_t count) noexcept
