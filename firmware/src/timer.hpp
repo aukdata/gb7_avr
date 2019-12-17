@@ -188,8 +188,6 @@ namespace gb7::timer
 
         static void on_timer_interrupt() noexcept
         {
-            cli();
-
             now++;
             if (now == next_time && callback != nullptr)
             {
@@ -203,8 +201,6 @@ namespace gb7::timer
                     callback = nullptr;
                 }
             }
-
-            sei();
         }
     };
 
