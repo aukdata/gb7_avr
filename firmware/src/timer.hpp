@@ -10,7 +10,7 @@
 
 namespace gb7::timer
 {
-    using time_unit = uint32_t;
+    using time_unit = uint64_t;
 
     namespace raw_timers
     {
@@ -66,7 +66,7 @@ namespace gb7::timer
                 {
                     TIMSK0 =
                         (compare_a ? 0b010 : 0) |
-                        (compare_b ? 0b110 : 0) |
+                        (compare_b ? 0b100 : 0) |
                         (overflow  ? 0b001 : 0);
                 }
             }
@@ -111,17 +111,18 @@ namespace gb7::timer
 
     namespace literals
     {
+        constexpr inline static double TIME_COEFF = 1e-6 / (1024 / static_cast<double>(F_CPU));
         constexpr time_unit operator""_us(unsigned long long v) noexcept
         {
-            return static_cast<time_unit>(v);
+            return static_cast<time_unit>(v * TIME_COEFF);
         }
         constexpr time_unit operator""_ms(unsigned long long v) noexcept
         {
-            return static_cast<time_unit>(v * 1e3);
+            return static_cast<time_unit>(v * TIME_COEFF * 1e3);
         }
         constexpr time_unit operator""_s(unsigned long long v) noexcept
         {
-            return static_cast<time_unit>(v * 1e6);
+            return static_cast<time_unit>(v * TIME_COEFF * 1e6);
         }
     } // namespace literals
 
@@ -141,8 +142,9 @@ namespace gb7::timer
         };
 
         constexpr inline static int MAX_CALLBACK_FUNC_NUM = 8;
+
         inline static stack_item items[MAX_CALLBACK_FUNC_NUM];
-        inline static time_unit now;
+        inline static time_unit now = 0;
 
     public:
         multi_timer() = delete;
@@ -152,7 +154,7 @@ namespace gb7::timer
         {
             raw_timers::timer2::init(
                 raw_timers::pwm_mode::none, raw_timers::pwm_mode::none,
-                raw_timers::timer_mode::normal, raw_timers::clock_division::division_8
+                raw_timers::timer_mode::normal, raw_timers::clock_division::no_division
             );
             for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
             {
@@ -160,7 +162,7 @@ namespace gb7::timer
             }
 
             raw_timers::timer2::enable_overflow_interrupt();
-            constexpr int of = 100e-6 * F_CPU;
+            sei();
         }
 
 
@@ -169,7 +171,7 @@ namespace gb7::timer
         {
             for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
             {
-                if (items[i].func != nullptr)
+                if (items[i].func == nullptr)
                 {
                     items[i].func = callback;
                     items[i].data = data;
@@ -186,7 +188,7 @@ namespace gb7::timer
         {
             for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
             {
-                if (items[i].func != nullptr)
+                if (items[i].func == nullptr)
                 {
                     items[i].func = callback;
                     items[i].data = data;
@@ -206,10 +208,11 @@ namespace gb7::timer
 
         static void on_timer_interrupt() noexcept
         {
+            cli();
             now++;
             for (int i = 0; i < MAX_CALLBACK_FUNC_NUM; i++)
             {
-                if (items[i].func != nullptr && items[i].next_time == now)
+                if (items[i].next_time == now && items[i].func != nullptr)
                 {
                     items[i].func(items[i].data);
                     if (items[i].period > 0)
@@ -222,8 +225,14 @@ namespace gb7::timer
                     }
                 }
             }
+            sei();
         }
     };
 } // namespace gb7::timer
+
+ISR(TIMER2_OVF_vect)
+{
+    gb7::timer::multi_timer::on_timer_interrupt();
+}
 
 #endif // TIMER_HPP
