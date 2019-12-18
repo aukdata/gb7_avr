@@ -37,6 +37,15 @@ namespace gb7
         {
             return m_size;
         }
+
+        template<class Func>
+        void each_of(Func func)
+        {
+            for (size_t i=0; i < m_size; i++)
+            {
+                func(arr[(head + i) % N]);
+            }
+        }
     };    
 } // namespace gb7
 
