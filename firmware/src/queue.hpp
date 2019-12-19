@@ -39,12 +39,34 @@ namespace gb7
         }
 
         template<class Func>
-        void each_of(Func func)
+        void each_of(Func func) // void func(T value, size_t index)
         {
             for (size_t i=0; i < m_size; i++)
             {
-                func(arr[(head + i) % N]);
+                func(arr[(head + i) % N], i);
             }
+        }
+
+        template<class Func>
+        bool all(Func func) // bool func(T value, size_t index)
+        {
+            for (size_t i=0; i < m_size; i++)
+            {
+                if (!func(arr[(head + i) % N], i))
+                    return false;
+            }
+            return true;
+        }
+
+        template<class Func>
+        bool any(Func func) // bool func(T value, size_t index)
+        {
+            for (size_t i=0; i < m_size; i++)
+            {
+                if (func(arr[(head + i) % N], i))
+                    return true;
+            }
+            return false;
         }
     };    
 } // namespace gb7
