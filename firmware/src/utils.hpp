@@ -1,7 +1,8 @@
-#include <stddef.h>
-
 #ifndef UTILS_HPP
 #define UTILS_HPP
+
+#include <stddef.h>
+#include <stdint.h>
 
 __extension__ typedef int __guard __attribute__((mode (__DI__)));
 
@@ -31,6 +32,15 @@ template<typename T>
 inline T max(T a, T b)
 {
     return a > b ? a : b;
+}
+
+inline int popcount(uint32_t x)
+{
+    auto bit = x - ((x >> 1) & 0x5555u);
+    bit = (bit & 0x3333) + ((bit >> 2) & 0x3333);
+    bit = (bit + (bit >> 4)) & 0x0f0f;
+    bit = (bit + (bit >> 8)) & 0x00ff;
+    return bit;
 }
 
 #endif // UTILS_HPP
