@@ -226,8 +226,7 @@ namespace gb7::timer
             sei();
         }
 
-        template<time_unit time>
-        static void evoke_in(callback_func f, void* d) noexcept
+        static void evoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
@@ -235,8 +234,7 @@ namespace gb7::timer
             period = 0;
         }
 
-        template<time_unit time>
-        static void evoke_every(callback_func f, void* d) noexcept
+        static void evoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
