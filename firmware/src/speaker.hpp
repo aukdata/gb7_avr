@@ -13,12 +13,18 @@ namespace gb7
     {
         None = -1,
         C    = 3822,
+        Cs   = 3677,
         D    = 3405,
+        Ds   = 3214,
         E    = 3033,
         F    = 2863,
+        Fs   = 2702,
         G    = 2551,
+        Gs   = 2407,
         A    = 2272,
+        As   = 2145,
         B    = 2024,
+        Ch   = 1911,
     };
 
     class speaker // consumes timer0
@@ -29,7 +35,7 @@ namespace gb7
             uint64_t length; // microseconds
         };
 
-        static inline queue<Note> m_notes;
+        static inline queue<Note, 128> m_notes;
         static inline Tone m_tone = Tone::None;
         static inline uint64_t m_count = 0;
         static inline uint64_t m_count_to = 0;
