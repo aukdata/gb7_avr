@@ -33,6 +33,13 @@ namespace gb7
             return true;
         }
 
+        void clear() noexcept
+        {
+            head = 0;
+            tail = 0;
+            m_size = 0;
+        }
+
         size_t size() const noexcept
         {
             return m_size;
