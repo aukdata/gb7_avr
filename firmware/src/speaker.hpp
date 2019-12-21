@@ -11,7 +11,7 @@ namespace gb7
 {
     enum class Tone: long
     {
-        None = 1000000000,
+        None = -1,
         C    = 3822,
         D    = 3405,
         E    = 3033,
@@ -21,18 +21,18 @@ namespace gb7
         B    = 2024,
     };
 
-    class speaker
+    class speaker // consumes timer0
     {
         struct Note
         {
             Tone tone;
-            long length; // milliseconds
+            uint64_t length; // microseconds
         };
 
-        static inline queue<Note> notes;
-        static inline Tone tone = Tone::None;
-        static inline long count = 0;
-        static inline long count_to = 0;
+        static inline queue<Note> m_notes;
+        static inline Tone m_tone = Tone::None;
+        static inline uint64_t m_count = 0;
+        static inline uint64_t m_count_to = 0;
 
     public:
         template<class SpeakerPin>
@@ -41,48 +41,56 @@ namespace gb7
             gb7::timer::timer0::init();
 
             using namespace gb7::timer::literals;
-            gb7::timer::timer0::evoke_every(2000_us, on_timer<SpeakerPin>, nullptr);
+            gb7::timer::timer0::evoke_every(100_ms, on_timer<SpeakerPin>);
         }
 
-        static inline bool enqueue_note(Tone tone, long length)
+        static inline bool enqueue_note(Tone tone, uint64_t length)
         {
-            return notes.push({ tone, length });
+            return m_notes.push({ tone, length });
         }
 
         template<class SpeakerPin>
         static void on_timer(void*)
         {
             SpeakerPin pin;
-            pin = !pin;
-            return;
 
-            if (count == count_to)
+            if(m_count < m_count_to)
             {
-                if (notes.size() > 0)
+                m_count++;
+
+                pin = !pin;
+            }
+            else // if (m_count >= m_count_to)
+            {
+                if (m_notes.size() > 0)
                 {
                     Note note_temp;
-                    notes.pop(note_temp);
+                    m_notes.pop(note_temp);
 
-                    tone = note_temp.tone;
-                    count_to = 2 * note_temp.length / static_cast<long>(tone);
-                    count = 0;
+                    if (note_temp.tone == Tone::None)
+                    {
+                        m_count = 0;
+                        m_count_to = 0;
 
-                    gb7::timer::timer0::evoke_in(gb7::timer::literals::operator""_us(static_cast<long>(tone) / 2), on_timer<SpeakerPin>);
+                        gb7::timer::timer0::evoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), on_timer<SpeakerPin>);
+                    }
+                    else
+                    {
+                        m_tone = note_temp.tone;
+                        m_count_to = 2 * note_temp.length / static_cast<long>(m_tone);
+                        m_count = 0;
+
+                        gb7::timer::timer0::evoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), on_timer<SpeakerPin>);
+                    }
                 }
                 else
                 {
-                    count_to = 0;
-                    count = 0;
+                    m_count_to = 0;
+                    m_count = 0;
 
                     using namespace gb7::timer::literals;
                     gb7::timer::timer0::evoke_in(100_ms, on_timer<SpeakerPin>);
                 }
-            }
-            else if(count < count_to)
-            {
-                count++;
-
-                pin = !pin;
             }
         }
     };
