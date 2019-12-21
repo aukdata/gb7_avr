@@ -126,7 +126,7 @@ namespace gb7::timer
 
     namespace literals
     {
-        constexpr inline static double TIME_COEFF = 1e-6 / (256 / static_cast<double>(F_CPU));
+        constexpr inline static double TIME_COEFF = (1e-6 * F_CPU) / 256;
         constexpr time_unit operator""_us(unsigned long long v) noexcept
         {
             return static_cast<time_unit>(v * TIME_COEFF);
@@ -186,7 +186,6 @@ namespace gb7::timer
 
         static void on_timer_interrupt() noexcept
         {
-            now++;
             if (now == next_time && callback != nullptr)
             {
                 callback(data);
@@ -199,6 +198,7 @@ namespace gb7::timer
                     callback = nullptr;
                 }
             }
+            now++;
         }
     };
 
@@ -244,9 +244,6 @@ namespace gb7::timer
 
         static void on_timer_interrupt() noexcept
         {
-            cli();
-
-            now++;
             if (now == next_time && callback != nullptr)
             {
                 callback(data);
@@ -259,8 +256,7 @@ namespace gb7::timer
                     callback = nullptr;
                 }
             }
-
-            sei();
+            now++;
         }
     };
 } // namespace gb7::timer
