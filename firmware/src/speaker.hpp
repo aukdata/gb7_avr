@@ -7,7 +7,7 @@
 #include "timer.hpp"
 #include "queue.hpp"
 
-namespace gb7
+namespace gb7::sound
 {
     enum class Tone: long
     {
@@ -100,6 +100,6 @@ namespace gb7
             }
         }
     };
-}
+} // namespace gb7::sound
 
 #endif // SPEAKER_HPP
