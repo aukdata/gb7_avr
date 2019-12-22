@@ -50,6 +50,13 @@ namespace gb7::sound
             gb7::timer::timer0::evoke_every(100_ms, on_timer<SpeakerPin>);
         }
 
+        static inline void stop_note()
+        {
+            m_notes.clear();
+            m_count = 0;
+            m_count_to = 0;
+        }
+
         static inline bool enqueue_note(Tone tone, uint64_t length)
         {
             return m_notes.push({ tone, length });
