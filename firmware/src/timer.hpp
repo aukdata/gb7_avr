@@ -168,7 +168,7 @@ namespace gb7::timer
             sei();
         }
 
-        static void evoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
+        static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
@@ -176,7 +176,7 @@ namespace gb7::timer
             period = 0;
         }
 
-        static void evoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
+        static void invoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
@@ -226,7 +226,7 @@ namespace gb7::timer
             sei();
         }
 
-        static void evoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
+        static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
@@ -234,7 +234,7 @@ namespace gb7::timer
             period = 0;
         }
 
-        static void evoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
+        static void invoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             callback = f;
             data = d;
@@ -262,7 +262,7 @@ namespace gb7::timer
 } // namespace gb7::timer
 
 
-#ifdef GB7_TIMER_USE_EVOKE
+#ifdef GB7_TIMER_USE_INVOKE
 
 ISR(TIMER0_OVF_vect)
 {
@@ -274,6 +274,6 @@ ISR(TIMER2_OVF_vect)
     gb7::timer::timer2::on_timer_interrupt();
 }
 
-#endif // GB7_TIMER_USE_EVOKE
+#endif // GB7_TIMER_USE_INVOKE
 
 #endif // TIMER_HPP

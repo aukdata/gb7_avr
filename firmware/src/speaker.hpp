@@ -1,7 +1,7 @@
 #ifndef SPEAKER_HPP
 #define SPEAKER_HPP
 
-#define GB7_TIMER_USE_EVOKE
+#define GB7_TIMER_USE_INVOKE
 
 #include "port.hpp"
 #include "timer.hpp"
@@ -47,7 +47,7 @@ namespace gb7::sound
             gb7::timer::timer0::init();
 
             using namespace gb7::timer::literals;
-            gb7::timer::timer0::evoke_every(100_ms, on_timer<SpeakerPin>);
+            gb7::timer::timer0::invoke_every(100_ms, on_timer<SpeakerPin>);
         }
 
         static inline void stop_note()
@@ -85,7 +85,7 @@ namespace gb7::sound
                         m_count = 0;
                         m_count_to = 0;
 
-                        gb7::timer::timer0::evoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), on_timer<SpeakerPin>);
+                        gb7::timer::timer0::invoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), on_timer<SpeakerPin>);
                     }
                     else
                     {
@@ -93,7 +93,7 @@ namespace gb7::sound
                         m_count_to = 2 * note_temp.length / static_cast<long>(m_tone);
                         m_count = 0;
 
-                        gb7::timer::timer0::evoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), on_timer<SpeakerPin>);
+                        gb7::timer::timer0::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), on_timer<SpeakerPin>);
                     }
                 }
                 else
@@ -102,7 +102,7 @@ namespace gb7::sound
                     m_count = 0;
 
                     using namespace gb7::timer::literals;
-                    gb7::timer::timer0::evoke_in(100_ms, on_timer<SpeakerPin>);
+                    gb7::timer::timer0::invoke_in(100_ms, on_timer<SpeakerPin>);
                 }
             }
         }
