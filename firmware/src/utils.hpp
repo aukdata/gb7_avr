@@ -22,13 +22,13 @@ void* operator new[](size_t size);
 void operator delete[](void* ptr, size_t size);
 
 
-template<typename T>
+template<class T>
 inline T min(T a, T b)
 {
     return a < b ? a : b;
 }
 
-template<typename T>
+template<class T>
 inline T max(T a, T b)
 {
     return a > b ? a : b;
