@@ -34,6 +34,23 @@ inline T max(T a, T b)
     return a > b ? a : b;
 }
 
+template<class T>
+struct remove_reference { typedef T type; };
+
+template<class T>
+constexpr class remove_reference<T>::type&& move(T&& t) noexcept
+{
+    return static_cast<class remove_reference<T>::type&&>(t);
+}
+
+template <class T>
+inline void swap(T& a, T& b) noexcept
+{
+  T t = move(a);
+  a = move(b);
+  b = move(t);
+}
+
 inline int popcount(uint32_t x)
 {
     auto bit = x - ((x >> 1) & 0x5555u);
