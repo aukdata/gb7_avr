@@ -38,9 +38,9 @@ template<class T>
 struct remove_reference { typedef T type; };
 
 template<class T>
-constexpr class remove_reference<T>::type&& move(T&& t) noexcept
+constexpr typename remove_reference<T>::type&& move(T&& t) noexcept
 {
-    return static_cast<class remove_reference<T>::type&&>(t);
+    return static_cast<typename remove_reference<T>::type&&>(t);
 }
 
 template <class T>
