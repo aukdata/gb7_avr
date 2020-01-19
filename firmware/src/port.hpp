@@ -105,15 +105,24 @@ namespace gb7
             return (*(port_address_converter<P>::get_port_address()) & mask) != 0;
         }
 
+        inline void set_high() const noexcept
+        {
+            *(port_address_converter<P>::get_port_address()) |= mask;
+        }
+        inline void set_low() const noexcept
+        {
+            *(port_address_converter<P>::get_port_address()) &= ~mask;
+        }
+
         inline void write(bool value) const noexcept
         {
             if (value)
             {
-                *(port_address_converter<P>::get_port_address()) |= mask;
+                set_high();
             }
             else
             {
-                *(port_address_converter<P>::get_port_address()) &= ~mask;
+                set_low();
             }
         }
 
@@ -234,6 +243,7 @@ namespace gb7
     public:
         port_mixed() noexcept {
             *(port_address_converter<P>::get_ddr_address()) = mask;
+            *(port_address_converter<P>::get_port_address()) = static_cast<uint8_t>(~mask);
         }
 
         inline uint8_t read() const noexcept
