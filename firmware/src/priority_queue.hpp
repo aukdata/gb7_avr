@@ -55,6 +55,27 @@ namespace gb7
             return true;
         }
 
+        bool update_top(const T& v) noexcept
+        {
+            if (size() == 0) return false;
+
+            arr[0] = move(v);
+
+            int n = arr.size();
+            int parent = 0, child;
+            while ((child = 2 * parent + 1) < n)
+            {
+                if (child + 1 < n && arr[child] > arr[child + 1])
+                    child++;
+                
+                if (arr[parent] > arr[child])
+                    swap(arr[parent], arr[child]);
+
+                parent = child;
+            }
+            return true;
+        }
+
         bool top(T& ret) const noexcept
         {
             if (size() == 0) return false;
