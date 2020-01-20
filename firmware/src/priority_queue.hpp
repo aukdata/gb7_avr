@@ -30,11 +30,10 @@ namespace gb7
             return true;
         }
 
-        bool pop(T& ret) noexcept
+        bool pop() noexcept
         {
             if (size() == 0) return false;
 
-            ret = arr[0];
             {
                 T temp;
                 arr.pop(temp);
