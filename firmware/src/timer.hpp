@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "priority_queue.hpp"
 
 #ifndef F_CPU
 #define F_CPU 8000000
@@ -143,77 +144,23 @@ namespace gb7::timer
 
 
     using callback_func = void(*)(void*);
-
-    class timer0
+    class multitimer
     {
-        static inline callback_func callback = nullptr;
-        static inline void* data = nullptr;
-        static inline time_unit next_time = 0;
-        static inline time_unit period = 0;
+        struct item
+        {
+            time_unit time;
+            time_unit period;
+            callback_func func;
+            void* data;
 
+            bool operator>(const item& lhs) const noexcept { return time > lhs.time; }
+            bool operator<(const item& lhs) const noexcept { return time < lhs.time; }
+        };
+        static inline priority_queue<item> q;
         static inline time_unit now = 0;
 
     public:
-        timer0() = delete;
-        ~timer0() = delete;
-
-        static void init() noexcept
-        {
-            raw_timers::raw_timer0::init(
-                raw_timers::pwm_mode::none, raw_timers::pwm_mode::none, raw_timers::timer_mode::normal,
-                raw_timers::timer_top::ff, raw_timers::clock_division::no_division
-            );
-
-            raw_timers::raw_timer0::enable_overflow_interrupt();
-            sei();
-        }
-
-        static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
-        {
-            callback = f;
-            data = d;
-            next_time = now + time;
-            period = 0;
-        }
-
-        static void invoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
-        {
-            callback = f;
-            data = d;
-            next_time = now + time;
-            period = time;
-        }
-
-        static void on_timer_interrupt() noexcept
-        {
-            if (now == next_time && callback != nullptr)
-            {
-                callback(data);
-                if (period > 0)
-                {
-                    next_time += period;
-                }
-                else
-                {
-                    callback = nullptr;
-                }
-            }
-            now++;
-        }
-    };
-
-    class timer2
-    {
-        static inline callback_func callback = nullptr;
-        static inline void* data = nullptr;
-        static inline time_unit next_time = 0;
-        static inline time_unit period = 0;
-
-        static inline time_unit now = 0;
-
-    public:
-        timer2() = delete;
-        ~timer2() = delete;
+        multitimer() = delete;
 
         static void init() noexcept
         {
@@ -228,32 +175,28 @@ namespace gb7::timer
 
         static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
-            callback = f;
-            data = d;
-            next_time = now + time;
-            period = 0;
+            if (f) q.push({ now + time, 0, f, d });
         }
 
-        static void invoke_every(time_unit time, callback_func f, void* d = nullptr) noexcept
+        static void invoke_every(time_unit period, time_unit time, callback_func f, void* d = nullptr) noexcept
         {
-            callback = f;
-            data = d;
-            next_time = now + time;
-            period = time;
+            if (f) q.push({ now + time, period, f, d });
         }
 
         static void on_timer_interrupt() noexcept
         {
-            if (now == next_time && callback != nullptr)
+            item temp;
+            while (q.top(temp) && temp.time <= now)
             {
-                callback(data);
-                if (period > 0)
+                temp.func(temp.data);
+                if (temp.period > 0)
                 {
-                    next_time += period;
+                    temp.time += temp.period;
+                    q.update_top(temp);
                 }
                 else
                 {
-                    callback = nullptr;
+                    q.pop();
                 }
             }
             now++;
@@ -271,7 +214,7 @@ ISR(TIMER0_OVF_vect)
 
 ISR(TIMER2_OVF_vect)
 {
-    gb7::timer::timer2::on_timer_interrupt();
+    gb7::timer::multitimer::on_timer_interrupt();
 }
 
 #endif // GB7_TIMER_USE_INVOKE
