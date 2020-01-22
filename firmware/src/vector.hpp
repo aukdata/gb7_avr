@@ -41,6 +41,19 @@ namespace gb7
             return arr[i];
         }
 
+        template<class Function>
+        size_t find(Function comparator) const noexcept
+        {
+            for (size_t i=0, s=size(); i < s; i++)
+            {
+                if (comparator((*this)[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         size_t size() const noexcept
         {
             return top;
