@@ -167,26 +167,33 @@ namespace gb7::timer
         {
             if (!initialized)
             {
-            raw_timers::raw_timer2::init(
-                raw_timers::pwm_mode::none, raw_timers::pwm_mode::none, raw_timers::timer_mode::normal,
-                raw_timers::timer_top::ff, raw_timers::clock_division::no_division
-            );
+                raw_timers::raw_timer2::init(
+                    raw_timers::pwm_mode::none, raw_timers::pwm_mode::none, raw_timers::timer_mode::normal,
+                    raw_timers::timer_top::ff, raw_timers::clock_division::no_division
+                );
 
-            raw_timers::raw_timer2::enable_overflow_interrupt();
-            sei();
+                raw_timers::raw_timer2::enable_overflow_interrupt();
+                sei();
 
                 initialized = true;
-        }
-        }
-
-        static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
-        {
-            if (f) q.push({ now + time, 0, f, d });
+            }
         }
 
-        static void invoke_every(time_unit period, time_unit time, callback_func f, void* d = nullptr) noexcept
+        static int invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
         {
-            if (f) q.push({ now + time, period, f, d });
+            if (f) return q.push({ now + time, 0, f, d });
+            return 0;
+        }
+
+        static int invoke_every(time_unit period, time_unit time, callback_func f, void* d = nullptr) noexcept
+        {
+            if (f) return q.push({ now + time, period, f, d });
+            return 0;
+        }
+
+        static bool cancel_invocation(int id)
+        {
+            return q.erase(id);
         }
 
         static void on_timer_interrupt() noexcept
