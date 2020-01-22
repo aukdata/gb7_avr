@@ -27,7 +27,8 @@ namespace gb7::sound
         Ch   = 1911,
     };
 
-    class speaker // consumes timer0
+    template<class SpeakerPin>
+    class speaker
     {
         struct Note
         {
@@ -41,31 +42,30 @@ namespace gb7::sound
         static inline uint64_t m_count_to = 0;
 
     public:
-        template<class SpeakerPin>
-        static inline void init()
+        inline void init()
         {
-            gb7::timer::timer0::init();
+            gb7::timer::multitimer::init();
 
             using namespace gb7::timer::literals;
-            gb7::timer::timer0::invoke_every(100_ms, on_timer<SpeakerPin>);
+            gb7::timer::multitimer::invoke_every(100_ms, 0_ms, on_timer<SpeakerPin>);
         }
 
-        static inline void stop_note()
+        inline void stop_note()
         {
             m_notes.clear();
             m_count = 0;
             m_count_to = 0;
         }
 
-        static inline bool enqueue_note(Tone tone, uint64_t length)
+        inline bool enqueue_note(Tone tone, uint64_t length)
         {
             return m_notes.push({ tone, length });
         }
 
-        template<class SpeakerPin>
+        template<class SpeakerPin_>
         static void on_timer(void*)
         {
-            SpeakerPin pin;
+            SpeakerPin_ pin;
 
             if(m_count < m_count_to)
             {
@@ -85,7 +85,7 @@ namespace gb7::sound
                         m_count = 0;
                         m_count_to = 0;
 
-                        gb7::timer::timer0::invoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), on_timer<SpeakerPin>);
+                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), 0, on_timer<SpeakerPin>);
                     }
                     else
                     {
@@ -93,7 +93,7 @@ namespace gb7::sound
                         m_count_to = 2 * note_temp.length / static_cast<long>(m_tone);
                         m_count = 0;
 
-                        gb7::timer::timer0::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), on_timer<SpeakerPin>);
+                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), 0, on_timer<SpeakerPin>);
                     }
                 }
                 else
@@ -102,7 +102,7 @@ namespace gb7::sound
                     m_count = 0;
 
                     using namespace gb7::timer::literals;
-                    gb7::timer::timer0::invoke_in(100_ms, on_timer<SpeakerPin>);
+                    gb7::timer::multitimer::invoke_in(100_ms, on_timer<SpeakerPin>);
                 }
             }
         }
