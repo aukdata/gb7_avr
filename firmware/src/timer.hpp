@@ -158,12 +158,15 @@ namespace gb7::timer
         };
         static inline priority_queue<item> q;
         static inline time_unit now = 0;
+        static inline bool initialized = false;
 
     public:
         multitimer() = delete;
 
         static void init() noexcept
         {
+            if (!initialized)
+            {
             raw_timers::raw_timer2::init(
                 raw_timers::pwm_mode::none, raw_timers::pwm_mode::none, raw_timers::timer_mode::normal,
                 raw_timers::timer_top::ff, raw_timers::clock_division::no_division
@@ -171,6 +174,9 @@ namespace gb7::timer
 
             raw_timers::raw_timer2::enable_overflow_interrupt();
             sei();
+
+                initialized = true;
+        }
         }
 
         static void invoke_in(time_unit time, callback_func f, void* d = nullptr) noexcept
