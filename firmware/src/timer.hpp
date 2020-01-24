@@ -196,9 +196,11 @@ namespace gb7::timer
 
         static void on_timer_interrupt() noexcept
         {
-            item temp;
-            while (q.top(temp) && temp.time <= now)
+            if (q.empty()) return;
+            
+            while (q.top().time == now)
             {
+                item temp = q.top();
                 temp.func(temp.data);
                 if (temp.period > 0)
                 {
