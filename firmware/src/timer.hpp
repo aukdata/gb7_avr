@@ -51,7 +51,6 @@ namespace gb7::timer
         {
         public:
             raw_timer0() = delete;
-            ~raw_timer0() = delete;
 
             static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, timer_top top, clock_division division) noexcept
             {
@@ -89,7 +88,6 @@ namespace gb7::timer
         {
         public:
             raw_timer2() = delete;
-            ~raw_timer2() = delete;
 
             static void init(pwm_mode oc0a, pwm_mode oc0b, timer_mode mode, timer_top top, clock_division division) noexcept
             {
