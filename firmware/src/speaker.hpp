@@ -36,7 +36,7 @@ namespace gb7::sound
             uint32_t length; // microseconds
         };
 
-        static inline queue<Note, 128> m_notes;
+        static inline queue<Note, 16> m_notes;
         static inline Tone m_tone = Tone::None;
         static inline uint32_t m_count = 0;
         static inline uint32_t m_count_to = 0;
