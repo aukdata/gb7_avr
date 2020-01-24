@@ -57,7 +57,7 @@ namespace gb7::sound
             m_count_to = 0;
         }
 
-        inline bool enqueue_note(Tone tone, uint64_t length)
+        inline bool enqueue_note(Tone tone, uint32_t length)
         {
             return m_notes.push({ tone, length });
         }
