@@ -125,7 +125,7 @@ namespace gb7::timer
 
     namespace literals
     {
-        constexpr inline static double TIME_COEFF = (1e-6 * F_CPU) / 256;
+        constexpr inline static double TIME_COEFF = (1e-6 * F_CPU) / 256 / 8;
         constexpr time_unit operator""_us(unsigned long long v) noexcept
         {
             return static_cast<time_unit>(v * TIME_COEFF);
@@ -167,7 +167,7 @@ namespace gb7::timer
             {
                 raw_timers::raw_timer2::init(
                     raw_timers::pwm_mode::none, raw_timers::pwm_mode::none, raw_timers::timer_mode::normal,
-                    raw_timers::timer_top::ff, raw_timers::clock_division::no_division
+                    raw_timers::timer_top::ff, raw_timers::clock_division::division_8
                 );
 
                 raw_timers::raw_timer2::enable_overflow_interrupt();
