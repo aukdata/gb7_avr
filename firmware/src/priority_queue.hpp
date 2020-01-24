@@ -38,7 +38,7 @@ namespace gb7
 
         bool pop() noexcept
         {
-            if (size() == 0) return false;
+            if (empty()) return false;
 
             {
                 item temp;
@@ -63,7 +63,7 @@ namespace gb7
 
         bool update_top(const T& v) noexcept
         {
-            if (size() == 0) return false;
+            if (empty()) return false;
 
             arr[0].data = move(v);
 
@@ -84,7 +84,7 @@ namespace gb7
 
         bool top(T& ret) const noexcept
         {
-            if (size() == 0) return false;
+            if (empty()) return false;
 
             ret = arr[0].data;
             return true;
@@ -120,6 +120,11 @@ namespace gb7
         size_t size() const noexcept
         {
             return arr.size();
+        }
+
+        bool empty() const noexcept
+        {
+            return size() == 0;
         }
     };
 } // namespace gb7
