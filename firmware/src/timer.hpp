@@ -225,6 +225,10 @@ ISR(TIMER2_OVF_vect)
     gb7::timer::multitimer::on_timer_interrupt();
 }
 
+#else
+
+#warning "GB7_TIMER_USE_INVOKE must be defined elsewhere."
+
 #endif // GB7_TIMER_USE_INVOKE
 
 #endif // TIMER_HPP
