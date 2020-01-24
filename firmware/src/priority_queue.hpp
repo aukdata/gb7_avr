@@ -90,6 +90,11 @@ namespace gb7
             return true;
         }
 
+        const T& top() const noexcept
+        {
+            return arr[0].data;
+        }
+
         bool erase(int id) noexcept
         {
             int i = arr.find([id](const item& v) { return v.id == id; });
