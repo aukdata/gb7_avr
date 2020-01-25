@@ -75,6 +75,11 @@ namespace gb7
             }
             return false;
         }
+
+        bool empty() const noexcept
+        {
+            return size() == 0;
+        }
     };    
 } // namespace gb7
 
