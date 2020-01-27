@@ -36,10 +36,10 @@ namespace gb7::sound
             uint32_t length; // microseconds
         };
 
-        static inline queue<Note, 16> m_notes;
-        static inline Tone m_tone = Tone::None;
-        static inline uint32_t m_count = 0;
-        static inline uint32_t m_count_to = 0;
+        queue<Note, 16> m_notes;
+        Tone m_tone = Tone::None;
+        uint32_t m_count = 0;
+        uint32_t m_count_to = 0;
 
     public:
         inline void init()
@@ -47,12 +47,13 @@ namespace gb7::sound
             gb7::timer::multitimer::init();
 
             using namespace gb7::timer::literals;
-            gb7::timer::multitimer::invoke_every(100_ms, 0_ms, on_timer<SpeakerPin>);
+            gb7::timer::multitimer::invoke_every(100_ms, 0_ms, on_timer<SpeakerPin>, this);
         }
 
         inline void stop_note()
         {
             m_notes.clear();
+            m_tone = Tone::None;
             m_count = 0;
             m_count_to = 0;
         }
@@ -63,46 +64,51 @@ namespace gb7::sound
         }
 
         template<class SpeakerPin_>
-        static void on_timer(void*)
+        static void on_timer(void* d)
         {
             SpeakerPin_ pin;
+            auto sp = static_cast<speaker<SpeakerPin_>*>(d);
 
-            if(m_count < m_count_to)
+            if(sp->m_count <= sp->m_count_to)
             {
-                m_count++;
-
-                pin = !pin;
+                sp->m_count++;
+                if (sp->m_tone != Tone::None)
+                {
+                    pin = !pin;
+                }
             }
-            else // if (m_count >= m_count_to)
+            else
             {
-                if (m_notes.size() > 0)
+                if (!sp->m_notes.empty())
                 {
                     Note note_temp;
-                    m_notes.pop(note_temp);
+                    sp->m_notes.pop(note_temp);
 
                     if (note_temp.tone == Tone::None)
                     {
-                        m_count = 0;
-                        m_count_to = 0;
+                        sp->m_tone = Tone::None;
+                        sp->m_count = 0;
+                        sp->m_count_to = 0;
 
-                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(note_temp.length / 2), 0, on_timer<SpeakerPin>);
+                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(note_temp.length), 0, on_timer<SpeakerPin>, d);
                     }
                     else
                     {
-                        m_tone = note_temp.tone;
-                        m_count_to = 2 * note_temp.length / static_cast<long>(m_tone);
-                        m_count = 0;
+                        sp->m_tone = note_temp.tone;
+                        sp->m_count_to = 2 * note_temp.length / static_cast<long>(sp->m_tone);
+                        sp->m_count = 0;
 
-                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(m_tone) / 2), 0, on_timer<SpeakerPin>);
+                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(sp->m_tone) / 2), 0, on_timer<SpeakerPin>, d);
                     }
                 }
                 else
                 {
-                    m_count_to = 0;
-                    m_count = 0;
+                    sp->m_tone = Tone::None;
+                    sp->m_count_to = 0;
+                    sp->m_count = 0;
 
                     using namespace gb7::timer::literals;
-                    gb7::timer::multitimer::invoke_in(100_ms, on_timer<SpeakerPin>);
+                    gb7::timer::multitimer::invoke_in(100_ms, on_timer<SpeakerPin>, d);
                 }
             }
         }
