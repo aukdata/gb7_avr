@@ -12,10 +12,10 @@ namespace gb7
         struct item
         {
             T data;
-            int id;
+            uint32_t id = 0;
         };
         vector<item, N> arr;
-        int count = 1;
+        uint32_t count = 1;
 
     public:
         int push(const T& v) noexcept
@@ -95,7 +95,7 @@ namespace gb7
             return arr[0].data;
         }
 
-        bool erase(int id) noexcept
+        bool erase(uint32_t id) noexcept
         {
             int i = arr.find([id](const item& v) { return v.id == id; });
             if (i == -1) return false;
