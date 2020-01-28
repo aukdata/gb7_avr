@@ -46,7 +46,7 @@ namespace gb7
         {
             for (size_t i=0, s=size(); i < s; i++)
             {
-                if (comparator((*this)[i]))
+                if (comparator(arr[i]))
                 {
                     return i;
                 }
