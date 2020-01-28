@@ -6,7 +6,7 @@
 
 namespace gb7
 {
-    template<class T, size_t N = 16, template<class, size_t> class Container = vector>
+    template<class T, size_t N = 16>
     class priority_queue
     {
         struct item
@@ -14,7 +14,7 @@ namespace gb7
             T data;
             int id;
         };
-        Container<item, N> arr;
+        vector<item, N> arr;
         int count = 1;
 
     public:
