@@ -9,9 +9,9 @@
 
 namespace gb7::sound
 {
-    enum class Tone: long
+    enum class Tone: uint32_t
     {
-        None = -1,
+        None = 0,
         C    = 3822,
         Cs   = 3677,
         D    = 3405,
@@ -101,7 +101,7 @@ namespace gb7::sound
                     else
                     {
                         sp->m_tone = note_temp.tone;
-                        sp->m_count_to = 2 * note_temp.length / static_cast<long>(sp->m_tone);
+                        sp->m_count_to = 2 * note_temp.length / static_cast<int>(sp->m_tone);
                         sp->m_count = 0;
 
                         gb7::timer::multitimer::cancel_invocation(sp->timer_id);
