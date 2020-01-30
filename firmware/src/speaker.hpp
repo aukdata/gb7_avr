@@ -74,7 +74,7 @@ namespace gb7::sound
             SpeakerPin_ pin;
             auto sp = static_cast<speaker<SpeakerPin_>*>(d);
 
-            if(sp->m_count <= sp->m_count_to)
+            if(sp->m_count < sp->m_count_to)
             {
                 sp->m_count++;
                 if (sp->m_tone != Tone::None)
@@ -113,6 +113,8 @@ namespace gb7::sound
                     sp->m_tone = Tone::None;
                     sp->m_count_to = 0;
                     sp->m_count = 0;
+
+                    pin.set_low();
 
                     gb7::timer::multitimer::cancel_invocation(sp->timer_id);
                     using namespace gb7::timer::literals;
