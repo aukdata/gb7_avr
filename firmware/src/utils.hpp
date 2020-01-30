@@ -60,4 +60,6 @@ inline int popcount(uint32_t x)
     return bit;
 }
 
+void delay_ms(int miliseconds) noexcept;
+
 #endif // UTILS_HPP

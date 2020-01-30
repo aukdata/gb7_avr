@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <util/delay.h>
 
 #include "utils.hpp"
 
@@ -31,4 +32,10 @@ void* operator new[](size_t size)
 void operator delete[](void* ptr, size_t)
 {
     free(ptr);
+}
+
+void delay_ms(int miliseconds) noexcept
+{
+    for (int i = 0; i < miliseconds; i++)
+        _delay_ms(1);
 }
