@@ -183,13 +183,13 @@ namespace gb7::timer
             return 0;
         }
 
-        static int invoke_every(time_unit period, time_unit time, callback_func f, void* d = nullptr) noexcept
+        static uint32_t invoke_every(time_unit period, time_unit time, callback_func f, void* d = nullptr) noexcept
         {
             if (f) return q.push({ now + time, period, f, d });
             return 0;
         }
 
-        static bool cancel_invocation(int id)
+        static bool cancel_invocation(uint32_t id) noexcept
         {
             return q.erase(id);
         }
