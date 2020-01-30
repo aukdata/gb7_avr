@@ -151,8 +151,8 @@ namespace gb7::timer
             callback_func func;
             void* data;
 
-            bool operator>(const item& lhs) const noexcept { return time > lhs.time; }
-            bool operator<(const item& lhs) const noexcept { return time < lhs.time; }
+            constexpr bool operator>(const item& lhs) const noexcept { return time > lhs.time; }
+            constexpr bool operator<(const item& lhs) const noexcept { return time < lhs.time; }
         };
         static inline priority_queue<item> q;
         static inline time_unit now = 0;
