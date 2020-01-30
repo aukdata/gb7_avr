@@ -12,7 +12,7 @@
 
 namespace gb7::timer
 {
-    using time_unit = uint64_t;
+    using time_unit = uint32_t;
 
     namespace raw_timers
     {   
