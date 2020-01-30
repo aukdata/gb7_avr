@@ -154,7 +154,7 @@ namespace gb7::timer
             constexpr bool operator>(const item& lhs) const noexcept { return time > lhs.time; }
             constexpr bool operator<(const item& lhs) const noexcept { return time < lhs.time; }
         };
-        static inline priority_queue<item> q;
+        static inline priority_queue<item, 16> q;
         static inline time_unit now = 0;
         static inline bool initialized = false;
 
