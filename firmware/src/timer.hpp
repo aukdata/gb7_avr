@@ -198,7 +198,7 @@ namespace gb7::timer
         {
             if (q.empty()) return;
             
-            while (q.top().time == now)
+            while (q.top().time == now && q.top().func != nullptr)
             {
                 item temp = q.top();
                 temp.func(temp.data);
