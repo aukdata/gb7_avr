@@ -40,14 +40,19 @@ namespace gb7::sound
         Tone m_tone = Tone::None;
         uint32_t m_count = 0;
         uint32_t m_count_to = 0;
+        uint32_t timer_id = 0;
 
     public:
-        inline void init()
+        speaker()
         {
             gb7::timer::multitimer::init();
 
             using namespace gb7::timer::literals;
-            gb7::timer::multitimer::invoke_every(100_ms, 0_ms, on_timer<SpeakerPin>, this);
+            timer_id = gb7::timer::multitimer::invoke_every(100_ms, 0, on_timer<SpeakerPin>, this);
+        }
+        ~speaker()
+        {
+            gb7::timer::multitimer::cancel_invocation(timer_id);
         }
 
         inline void stop_note()
@@ -90,7 +95,8 @@ namespace gb7::sound
                         sp->m_count = 0;
                         sp->m_count_to = 0;
 
-                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(note_temp.length), 0, on_timer<SpeakerPin>, d);
+                        gb7::timer::multitimer::cancel_invocation(sp->timer_id);
+                        sp->timer_id = gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(note_temp.length), 0, on_timer<SpeakerPin_>, d);
                     }
                     else
                     {
@@ -98,7 +104,8 @@ namespace gb7::sound
                         sp->m_count_to = 2 * note_temp.length / static_cast<long>(sp->m_tone);
                         sp->m_count = 0;
 
-                        gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(static_cast<long>(sp->m_tone) / 2), 0, on_timer<SpeakerPin>, d);
+                        gb7::timer::multitimer::cancel_invocation(sp->timer_id);
+                        sp->timer_id = gb7::timer::multitimer::invoke_every(gb7::timer::literals::operator""_us(static_cast<int>(sp->m_tone) / 2), 0, on_timer<SpeakerPin_>, d);
                     }
                 }
                 else
@@ -107,8 +114,9 @@ namespace gb7::sound
                     sp->m_count_to = 0;
                     sp->m_count = 0;
 
+                    gb7::timer::multitimer::cancel_invocation(sp->timer_id);
                     using namespace gb7::timer::literals;
-                    gb7::timer::multitimer::invoke_in(100_ms, on_timer<SpeakerPin>, d);
+                    sp->timer_id = gb7::timer::multitimer::invoke_in(100_ms, on_timer<SpeakerPin_>, d);
                 }
             }
         }
